@@ -3015,7 +3015,7 @@ static void CloseHandleIfValid(HANDLE handle)
   if (handle != INVALID_HANDLE_VALUE) { CloseHandle(handle); }
 }
 
-Bpipe* OpenBpipe(char* prog, int wait, const char* mode, bool)
+Bpipe* OpenBpipe(char* prog, int wait, const char* mode, bool dup_stderr)
 {
   int mode_read, mode_write;
   SECURITY_ATTRIBUTES saAttr;
@@ -3082,11 +3082,15 @@ Bpipe* OpenBpipe(char* prog, int wait, const char* mode, bool)
     hChildStdinWr = INVALID_HANDLE_VALUE;
   }
 
+  HANDLE hChildStderrWr = INVALID_HANDLE_VALUE;
+  if (dup_stderr) {
+    hChildStdoutWr = hChildStdoutWr;
+  }
   // Spawn program with redirected handles as appropriate
   bpipe->worker_pid = CreateChildProcess(prog,            /* Commandline */
                                          hChildStdinRd,   /* stdin HANDLE */
                                          hChildStdoutWr,  /* stdout HANDLE */
-                                         hChildStdoutWr); /* stderr HANDLE */
+                                         hChildStderrWr); /* stderr HANDLE */
 
   if (bpipe->worker_pid == INVALID_HANDLE_VALUE) goto cleanup;
 
